@@ -51,7 +51,7 @@ export async function signUp(prevState: any, formData: FormData) {
   const supabase = createClient()
 
   try {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.toString(),
       password: password.toString(),
       options: {
@@ -68,7 +68,15 @@ export async function signUp(prevState: any, formData: FormData) {
       return { error: error.message }
     }
 
-    return { success: "Check your email to confirm your account." }
+    if (data.session) {
+      // User is immediately authenticated, redirect to onboarding
+      redirect("/onboarding")
+    } else if (data.user && !data.session) {
+      // Fallback: email confirmation is required (shouldn't happen with disabled confirmation)
+      return { success: "Check your email to confirm your account." }
+    }
+
+    return { success: "Account created successfully, redirecting..." }
   } catch (error) {
     console.error("Sign up error:", error)
     return { error: "An unexpected error occurred. Please try again." }
