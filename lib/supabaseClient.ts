@@ -1,5 +1,10 @@
 import { createClient } from "@supabase/supabase-js"
 
+import { createClient } from '@supabase/supabase-js'
+const supabaseUrl = 'https://tgohmjxtsjapawpuenuq.supabase.co'
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
+
 const url = process.env.POSTGRES_NEXT_PUBLIC_SUPABASE_URL
 const anon = process.env.POSTGRES_NEXT_PUBLIC_SUPABASE_ANON_KEY
 
