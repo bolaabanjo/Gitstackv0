@@ -1,11 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase/server"
+import { createClient } from "@supabase/supabase-js"
 import { groq } from "@ai-sdk/groq"
 import { generateText } from "ai"
 
 export async function POST(request: NextRequest) {
   try {
     const { message, projectId } = await request.json()
+
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
     const {
       data: { session },

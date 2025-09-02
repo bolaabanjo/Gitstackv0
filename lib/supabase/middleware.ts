@@ -1,4 +1,4 @@
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@supabase/supabase-js"
 import { NextResponse, type NextRequest } from "next/server"
 
 // Check if Supabase environment variables are available
@@ -18,22 +18,23 @@ export async function updateSession(request: NextRequest) {
 
   const res = NextResponse.next()
 
-  // Create a Supabase client configured to use cookies
-  const supabase = createMiddlewareClient({ req: request, res })
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    auth: {
+      flowType: "pkce",
+    },
+  })
 
   // Check if this is an auth callback
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
 
   if (code) {
-    // Exchange the code for a session
     await supabase.auth.exchangeCodeForSession(code)
     // Redirect to onboarding after successful auth
     return NextResponse.redirect(new URL("/onboarding", request.url))
   }
 
-  // Refresh session if expired - required for Server Components
-  await supabase.auth.getSession()
+  // Session will be checked in individual route handlers
 
   // Protected routes - redirect to login if not authenticated
   const isAuthRoute =
@@ -44,23 +45,11 @@ export async function updateSession(request: NextRequest) {
   const isPublicRoute = request.nextUrl.pathname === "/"
 
   if (!isAuthRoute && !isPublicRoute) {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+    const authToken = request.cookies.get("sb-access-token")
 
-    if (!session) {
+    if (!authToken) {
       const redirectUrl = new URL("/auth/login", request.url)
       return NextResponse.redirect(redirectUrl)
-    }
-
-    if (request.nextUrl.pathname.startsWith("/dashboard") && request.nextUrl.pathname !== "/onboarding") {
-      // Check if user has completed onboarding (has projects)
-      const { data: projects } = await supabase.from("projects").select("id").eq("user_id", session.user.id).limit(1)
-
-      if (!projects || projects.length === 0) {
-        const onboardingUrl = new URL("/onboarding", request.url)
-        return NextResponse.redirect(onboardingUrl)
-      }
     }
   }
 
