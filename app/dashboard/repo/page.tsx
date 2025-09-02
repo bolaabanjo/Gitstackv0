@@ -1,11 +1,8 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { supabase } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { RepoInterface } from "@/components/repo/repo-interface"
 
 export default async function RepoPage() {
-  const supabase = createServerComponentClient({ cookies })
-
   const {
     data: { session },
   } = await supabase.auth.getSession()
