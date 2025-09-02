@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase/server"
+import { supabase } from "@/lib/supabaseClient"
 import { groq } from "@ai-sdk/groq"
 import { generateText } from "ai"
 

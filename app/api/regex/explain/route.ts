@@ -1,11 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase/server"
+import { createClient } from "@supabase/supabase-js"
 import { groq } from "@ai-sdk/groq"
 import { generateText } from "ai"
 
 export async function POST(request: NextRequest) {
   try {
     const { pattern } = await request.json()
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ error: "Supabase not configured" }, { status: 500 })
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     const {
       data: { session },

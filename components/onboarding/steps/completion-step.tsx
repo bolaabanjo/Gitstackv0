@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Code2, Zap, ArrowRight, Loader2 } from "lucide-react"
 import type { User } from "@supabase/supabase-js"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { useRouter } from "next/navigation"
 
 interface CompletionStepProps {

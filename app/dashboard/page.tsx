@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { supabase } from "@/lib/supabaseClient"
 import { redirect } from "next/navigation"
 import DashboardLayout from "@/components/dashboard/dashboard-layout"
 import ProjectsGrid from "@/components/dashboard/projects-grid"
@@ -7,7 +7,6 @@ import RecentActivity from "@/components/dashboard/recent-activity"
 import WelcomeHeader from "@/components/dashboard/welcome-header"
 
 export default async function DashboardPage() {
-  const supabase = createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

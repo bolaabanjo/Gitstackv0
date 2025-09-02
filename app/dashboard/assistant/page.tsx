@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase/server"
+import { supabase } from "@/lib/supabaseClient"
 import { redirect } from "next/navigation"
 import { AssistantInterface } from "@/components/assistant/assistant-interface"
 
