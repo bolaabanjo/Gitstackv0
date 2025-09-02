@@ -1,11 +1,13 @@
 import { createClient } from "@supabase/supabase-js"
 
-const url = process.env.POSTGRESS_NEXT_PUBLIC_SUPABASE_URL
-const anon = process.env.POSTGRESS_NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = process.env.POSTGRESS_NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.POSTGRESS_NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 let supabase: any
 
-if (!url || !anon) {
+if (!supabaseUrl || !supabaseAnonKey) {
   if (process.env.NODE_ENV !== "production") {
     console.warn("Supabase envs missing: add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY")
   }
@@ -28,7 +30,7 @@ if (!url || !anon) {
     }),
   }
 } else {
-  supabase = createClient(url, anon)
+  supabase = createClient(supabaseUrl, supabaseAnonKey)
 }
 
 export { supabase }
