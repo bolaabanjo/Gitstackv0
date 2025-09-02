@@ -5,7 +5,6 @@ const supabaseAnonKey = process.env.POSTGRESS_NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-let supabase: any
 
 if (!supabaseUrl || !supabaseAnonKey) {
   if (process.env.NODE_ENV !== "production") {
