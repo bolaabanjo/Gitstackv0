@@ -1,7 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
-import { useFormStatus } from "react-dom"
+import { useState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,15 +8,15 @@ import { Separator } from "@/components/ui/separator"
 import { Loader2 } from "lucide-react"
 import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { signUp } from "@/lib/actions"
 import { supabase } from "@/lib/supabaseClient"
 
-function SubmitButton() {
-  const { pending } = useFormStatus()
-
+function SubmitButton({ isPending }: { isPending: boolean }) {
   return (
-    <Button type="submit" disabled={pending} className="w-full rounded-full" size="lg">
-      {pending ? (
+    <Button type="submit" disabled={isPending} className="w-full rounded-full" size="lg">
+      {isPending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Creating account...
@@ -30,7 +29,22 @@ function SubmitButton() {
 }
 
 export default function SignUpForm() {
-  const [state, formAction] = useActionState(signUp, null)
+  const router = useRouter()
+  const [state, setState] = useState<{ error?: string; success?: string } | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    if (state?.success) {
+      router.push("/onboarding")
+    }
+  }, [state, router])
+
+  const handleSubmit = async (formData: FormData) => {
+    startTransition(async () => {
+      const result = await signUp(null, formData)
+      setState(result)
+    })
+  }
 
   const handleOAuthSignUp = async (provider: "google" | "github") => {
     try {
@@ -42,9 +56,19 @@ export default function SignUpForm() {
       })
 
       if (error) {
+        if (error.message === "Supabase not configured") {
+          setState({ error: "Authentication is not configured. Please contact support." })
+        } else {
+          setState({ error: `Failed to sign up with ${provider}. Please try again.` })
+        }
         console.error(`${provider} sign up error:`, error)
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.message === "Supabase not configured") {
+        setState({ error: "Authentication is not configured. Please contact support." })
+      } else {
+        setState({ error: `Failed to sign up with ${provider}. Please try again.` })
+      }
       console.error(`${provider} sign up error:`, error)
     }
   }
@@ -57,9 +81,9 @@ export default function SignUpForm() {
           <p className="text-center text-muted-foreground">Join GitStack and start building</p>
         </CardHeader>
         <CardContent className="space-y-6">
-          <form action={formAction} className="space-y-4">
+          <form action={handleSubmit} className="space-y-4">
             {state?.error && (
-              <div className="bg-destructive/10 border border-destructive/50 text-destructive px-4 py-3 rounded-full text-sm">
+              <div className="bg-destructive/10 border border-destructive/50 text-destructive px-4 py-3 text-sm rounded-lg">
                 {state.error}
               </div>
             )}
@@ -117,7 +141,7 @@ export default function SignUpForm() {
               </div>
             </div>
 
-            <SubmitButton />
+            <SubmitButton isPending={isPending} />
           </form>
 
           <div className="relative">
