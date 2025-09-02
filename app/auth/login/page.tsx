@@ -11,7 +11,7 @@ export default async function LoginPage() {
 
   // If user is already logged in, redirect to dashboard
   if (session) {
-    redirect("/dashboard")
+    redirect("/onboarding")
   }
 
   return (
