@@ -4,8 +4,15 @@ import { groq } from "@ai-sdk/groq"
 import { generateText } from "ai"
 
 export async function POST(request: NextRequest) {
+  let pattern: string;
   try {
-    const { pattern } = await request.json()
+    const body = await request.json();
+    pattern = body.pattern;
+
+    // Validate the incoming 'pattern' to ensure it's a non-empty string.
+    if (typeof pattern !== 'string' || pattern.trim().length === 0) {
+      return NextResponse.json({ error: "Invalid pattern provided. Pattern must be a non-empty string." }, { status: 400 })
+    }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -45,6 +52,10 @@ The user will provide a regex pattern, and you should explain it clearly.`
     return NextResponse.json({ explanation: text.trim() })
   } catch (error) {
     console.error("Regex explanation error:", error)
+    // Differentiate between JSON parsing errors and other server errors
+    if (error instanceof SyntaxError && error.message.includes('JSON')) {
+      return NextResponse.json({ error: "Invalid JSON body provided" }, { status: 400 });
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
