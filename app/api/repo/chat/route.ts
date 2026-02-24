@@ -7,10 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const { message, repository } = await request.json()
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
+    const session = await supabase.auth.getSession()
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
